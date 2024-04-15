@@ -1,0 +1,94 @@
+import numpy as np
+import pandas as pd
+from sklearn.linear_model import LinearRegression
+from matplotlib import pyplot as plt
+
+#data = pd.read_csv('/Users/thomasfearn/Downloads/round-2-island-data-bottle/prices_round_2_day_-1.csv',sep =';')
+#data = pd.read_csv('/Users/thomasfearn/Downloads/round-2-island-data-bottle/prices_round_2_day_0.csv',sep =';')
+data = pd.read_csv('/Users/thomasfearn/Downloads/round-2-island-data-bottle/prices_round_2_day_1.csv',sep =';')
+
+y = list(data['ORCHIDS'])
+tranfee = list(data['TRANSPORT_FEES'])
+xport = list(data['EXPORT_TARIFF'])
+mport = list(data['IMPORT_TARIFF'])
+sun = list(data['SUNLIGHT'])
+hum = list(data['HUMIDITY'])
+
+humeff = []
+for i in range(len(hum)):
+    h=max(0,hum[i]-80)+max(0,60-hum[i])
+    humeff.append(h)
+    
+x = []
+for i in range(len(y)):
+    inputs=[]
+    #inputs.append(tranfee[i])
+    inputs.append(xport[i])
+    inputs.append(mport[i])
+    inputs.append(sun[i])
+    inputs.append(hum[i])
+    x.append(inputs)
+
+x, y = np.array(x), np.array(y)
+
+model = LinearRegression().fit(x, y)
+
+print(f"coefficient of determination: {model.score(x, y)}")
+
+print(f"intercept: {model.intercept_}")
+
+print(f"coefficients: {model.coef_}")
+
+y_pred = model.predict(x)
+
+time = list(data['timestamp'])
+
+plt.scatter(time,y)
+plt.scatter(time,y_pred)
+
+#day -1
+#coefficient of determination: 0.4818584364943078
+#intercept: 1134.4790812320703
+#coefficients: [18.29840157 -1.75173734  9.72377141  0.02336057  1.16383588]
+
+#day 0
+#coefficient of determination: 0.7815137152549951
+#intercept: 1083.6330587092168
+#coefficients: [-6.97107669e+01  8.13743076e+00  2.82303584e+01  1.61769059e-02
+ # 3.45074142e+00]
+ 
+#day 1
+#coefficient of determination: 0.587244067328702
+#intercept: 1078.347089310686
+#coefficients: [ 3.56011477e+01 -1.88625754e+00  3.94361967e+00 -8.54663842e-03
+ # 3.13326997e+00]
+ 
+# average
+intercept = (1013.5712097346516 + 975.8752949869662 + 957.1858363049498)/3
+transfeeslope = (15.79747564+-5.56219784e+01 +6.44605880e+01)/3
+xportslope = (-1.49052818 + 6.40131365e+00 +4.24054714e-01)/3
+mportslope = (3.32115275e+01 + 3.35800971e+00 +7.32082057)/3
+sunslope = (0.01885928 + 1.50055687e-02 + -1.19231362e-02)/3
+humslope = (1.62136031 +1.75340752e+00 +1.10881367e+00)/3
+
+print(intercept) #982.2107803421892
+print(transfeeslope) #8.212028413333334
+print(xportslope) #1.7782800613333334
+print(mportslope) #14.63011926
+print(sunslope) #0.007313904166666666
+print(humslope) #1.4945271666666666
+ 
+timesincebought = []
+t=0
+for i in range(len(y)):
+    if y[i] < y_pred[i]:
+        t = t+1
+    elif t>0 and y[i] >= y_pred[i]:
+        timesincebought.append(t)
+        t=0
+
+timesincebought.sort()
+
+print(timesincebought[int(len(timesincebought)/2)])
+
+print(timesincebought)

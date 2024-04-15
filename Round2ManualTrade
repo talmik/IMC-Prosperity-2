@@ -1,0 +1,45 @@
+def rate(x, y):
+    if x==y:
+        return 1
+    elif x==0 and y==1:
+        return 1.41
+    elif x==0 and y==2:
+        return 0.61
+    elif x==0 and y==3:
+        return 2.08
+    elif x==1 and y==0:
+        return 0.71
+    elif x==1 and y==2:
+        return 0.48
+    elif x==1 and y==3:
+        return 1.52
+    elif x==2 and y==0:
+        return 1.56
+    elif x==2 and y==1:
+        return 2.05
+    elif x==2 and y==3:
+        return 3.26
+    elif x==3 and y==0:
+        return 0.46
+    elif x==3 and y==1:
+        return 0.64
+    elif x==3 and y==2:
+        return 0.3
+        
+cur = [0,1,2,3]
+
+from itertools import product
+
+vectorList = []
+for item in product(cur, repeat = 4):
+    vectorList.append(item)
+
+
+resultList = []
+for x in vectorList:
+    r=rate(0,x[0]) * rate(x[0],x[1]) * rate(x[1],x[2]) * rate(x[2],x[3]) * rate(x[3],0)
+    resultList.append((r, x))
+    
+
+resultList.sort()
+print(resultList[-1])

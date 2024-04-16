@@ -13,20 +13,21 @@ basicbest=[basicvalues[-1],basicvalues[-2],basicvalues[-3]]
 basicbest[1][0]=basicbest[1][0]-25000
 basicbest[2][0]=basicbest[2][0]-75000
 
-lvl0=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+lvl0=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0] #lvl0 thinkers choose best money/hunters ratio
+#lvl0=[0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12] #lvl0 thinkers pick randomly
 
-#print(basicbest)
+print(basicbest)
 
-p=0.1
+p=0.5 # number of previously thought lvl k thinkers who are actually lvl k+1 thinkers
 
 strat=lvl0
 
-for n in range(100):
+for k in range(100):
     #print(strat)
     oldstrat=strat
     values=[]
     for i in range(25):
-        values.append([chests[i]*7500/(hunters[i]+100*oldstrat[i]),i])
+        values.append([chests[i]*7500/(hunters[i]+100*oldstrat[i]),i]) #calculates money/hunter of each region
         
     values.sort()
     
@@ -34,17 +35,16 @@ for n in range(100):
     best[1][0]=best[1][0]-25000
     best[2][0]=best[2][0]-75000
     
-    #print(best)
+    print(best) #best three regions and their expected profited
     
     newstrat=[]
     for i in range(25):
         newstrat.append(0)
         for j in range(3):
             if i==best[j][1] and best[j][0]>0:
-                newstrat[i]=1
-    
+                newstrat[i]=1 #lvl k+1 thinker will go to these best three regions, unless expect to lose money
+
     strat=[]
     for i in range(25):
-        strat.append(p*newstrat[i]+(1-p)*oldstrat[i]) #gonna edit this to try see if i can get convergent behaviour
+        strat.append((p**(k+1))*newstrat[i]+(1-p**(k+1))*oldstrat[i]) #figure out new proportions going to each region
 
-    

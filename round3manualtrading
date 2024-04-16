@@ -1,0 +1,50 @@
+chests = [24,70,41,21,60,47,82,87,80,35,73,89,100,90,17,77,83,85,79,55,12,27,52,15,30]
+
+hunters = [2,4,3,2,4,3,5,5,5,3,4,5,8,7,2,5,5,5,5,4,2,3,4,2,3]
+
+basicvalues=[]
+for i in range(25):
+    basicvalues.append([chests[i]*7500/hunters[i],i])
+    
+basicvalues.sort()
+
+basicbest=[basicvalues[-1],basicvalues[-2],basicvalues[-3]]
+
+basicbest[1][0]=basicbest[1][0]-25000
+basicbest[2][0]=basicbest[2][0]-75000
+
+lvl0=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
+
+#print(basicbest)
+
+p=0.1
+
+strat=lvl0
+
+for n in range(100):
+    #print(strat)
+    oldstrat=strat
+    values=[]
+    for i in range(25):
+        values.append([chests[i]*7500/(hunters[i]+100*oldstrat[i]),i])
+        
+    values.sort()
+    
+    best=[values[-1],values[-2],values[-3]]
+    best[1][0]=best[1][0]-25000
+    best[2][0]=best[2][0]-75000
+    
+    #print(best)
+    
+    newstrat=[]
+    for i in range(25):
+        newstrat.append(0)
+        for j in range(3):
+            if i==best[j][1] and best[j][0]>0:
+                newstrat[i]=1
+    
+    strat=[]
+    for i in range(25):
+        strat.append(p*newstrat[i]+(1-p)*oldstrat[i])
+
+    

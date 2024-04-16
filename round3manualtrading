@@ -45,6 +45,6 @@ for n in range(100):
     
     strat=[]
     for i in range(25):
-        strat.append(p*newstrat[i]+(1-p)*oldstrat[i])
+        strat.append(p*newstrat[i]+(1-p)*oldstrat[i]) #gonna edit this to try see if i can get convergent behaviour
 
     

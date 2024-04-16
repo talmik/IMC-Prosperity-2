@@ -1,3 +1,4 @@
+import numpy as np
 from matplotlib import pyplot as plt
 
 chests = [24,70,41,21,60,47,82,87,80,35,73,89,100,90,17,77,83,85,79,55,12,27,52,15,30]
@@ -15,14 +16,24 @@ basicbest=[basicvalues[-1],basicvalues[-2],basicvalues[-3]]
 basicbest[1][0]=basicbest[1][0]-25000
 basicbest[2][0]=basicbest[2][0]-75000
 
-#lvl0=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0] #lvl0 thinkers choose best money/hunters ratio
-lvl0=[0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12,0.12] #lvl0 thinkers pick randomly
+lvl0=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0] #lvl0 thinkers choose best money/hunters ratio
+#lvl0=25*[0.12] #lvl0 thinker randomly distributed
 
-#print(basicbest)
+ratio=25*[0]
+for i in range(25):
+    ratio[i]=chests[i]/hunters[i]
+tot = sum(ratio)
+
+for i in range(25):
+    lvl0[i]=ratio[i]/tot #lvl0 thinkers choice randomly proportional to money/hunter
 
 profit=100*[0]
 
 p=100*[0]
+
+expeditions = 100*[0]
+
+best=basicbest
 
 for n in range(100):
 
@@ -30,14 +41,19 @@ for n in range(100):
     
     strat=lvl0
     
-    for k in range(10000):
-        #print(strat)
-        oldstrat=strat
+    if n==0:
+        r=0
+    elif n>0:
+        r=int(4/(2-np.log10(n))+1) #after k=r the change in strategy will be negligible, so dont bother calculating this high
+    
+    for k in range(r):
         values=[]
         for i in range(25):
-            values.append([chests[i]*7500/(hunters[i]+100*oldstrat[i]),i]) #calculates money/hunter of each region
+            values.append([chests[i]*7500/(hunters[i]+100*strat[i]),i]) #calculates money/hunter of each region
             
         values.sort()
+        
+        oldbest=best
         
         best=[values[-1],values[-2],values[-3]]
         best[1][0]=best[1][0]-25000
@@ -45,20 +61,22 @@ for n in range(100):
         
         #print(best) #best three regions and their expected profited
         
-        newstrat=[]
+        stratchange=25*[0]
         for i in range(25):
-            newstrat.append(0)
             for j in range(3):
                 if i==best[j][1] and best[j][0]>0:
-                    newstrat[i]=1 #lvl k+1 thinker will go to these best three regions, unless expect to lose money
-    
-        strat=[]
+                    stratchange[i]=stratchange[i]+1 #lvl k+1 thinker will go to these best three regions, unless expect to lose money
+                elif i==oldbest[j][1] and oldbest[j][0]>0:
+                    stratchange[i]=stratchange[i]-1 #lvl k thinker did these, so need to change from this
+        
         for i in range(25):
-            strat.append((p[n]**(k+1))*newstrat[i]+(1-p[n]**(k+1))*oldstrat[i]) #figure out new proportions going to each region
-    
+            strat[i] = strat[i] + (p[n]**(k+1))*stratchange[i] #figure out new proportions going to each region
+        #print(stratchange)
     for m in range(3):
         if best[m][0]>0:
             profit[n]=profit[n]+best[m][0]
-    print([p[n],profit[n]])
+    
+    expeditions[n] = best
+    print([p[n],expeditions[n]])
     
 plt.scatter(p,profit)

@@ -5,78 +5,105 @@ chests = [24,70,41,21,60,47,82,87,80,35,73,89,100,90,17,77,83,85,79,55,12,27,52,
 
 hunters = [2,4,3,2,4,3,5,5,5,3,4,5,8,7,2,5,5,5,5,4,2,3,4,2,3]
 
-basicvalues=[]
+dumb=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0] #lvl0 thinkers choose best money/hunters ratio
+random=25*[0.12] #lvl0 thinker randomly distributed
+
+spread=[0.04,0.12,0.04,0.02,0.1,0.08,0.12,0.12,0.14,0.06,0.12,0.22,0.12,0.14,0.06,0.1,0.14,0.14,0.14,0.1,0,0.02,0.08,0,0.06]
+
+pi = 7500*sum(chests)/(sum(hunters)+200)
+
+nash=25*[0]
+
 for i in range(25):
-    basicvalues.append([chests[i]*7500/hunters[i],i])
+    nash[i] = (7500*chests[i]-pi*hunters[i])/(pi*100)
     
-basicvalues.sort()
-
-basicbest=[basicvalues[-1],basicvalues[-2],basicvalues[-3]]
-
-basicbest[1][0]=basicbest[1][0]-25000
-basicbest[2][0]=basicbest[2][0]-75000
-
-lvl0=[0,1,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0] #lvl0 thinkers choose best money/hunters ratio
-#lvl0=25*[0.12] #lvl0 thinker randomly distributed
-
-ratio=25*[0]
-for i in range(25):
-    ratio[i]=chests[i]/hunters[i]
-tot = sum(ratio)
-
-for i in range(25):
-    lvl0[i]=ratio[i]/tot #lvl0 thinkers choice randomly proportional to money/hunter
-
-profit=100*[0]
+random=25*[0.12]
 
 p=100*[0]
-
-expeditions = 100*[0]
-
-best=basicbest
-
+dist=25*[0]
+values=25*[0]
+choice = 100*[0]
 for n in range(100):
+    p[n]=(n+1)/100
+    for i in range(25):
+        dist[i]=(1-p[n])*dumb[i]+p[n]*spread[i]
+        values[i]=[7500*chests[i]/(hunters[i]+100*dist[i]),i]
+    values.sort()
+    best=[values[-1],values[-2],values[-3]]
+    best[1][0]=best[1][0]-25000
+    best[2][0]=best[2][0]-75000
+    choice[n]=best
+    
+for n in range(100):
+    print(choice[n])
 
-    p[n]=n/100 # number of previously thought lvl k thinkers who are actually lvl k+1 thinkers
+#dumb/random gives 7,17
+#dumb/spread gives too many options
+#dumb/nash gives 7,17
+#random/spread gives 7,12
+#random/nash gives 7,11
+#spread/nash gives 20,23
+
+
+
+# ratio=25*[0]
+# for i in range(25):
+#     ratio[i]=chests[i]/hunters[i]
+# tot = sum(ratio)
+
+# for i in range(25):
+#     lvl0[i]=ratio[i]/tot #lvl0 thinkers choice randomly proportional to money/hunter
+
+# profit=100*[0]
+
+# p=100*[0]
+
+# expeditions = 100*[0]
+
+# best=[[0,1],[0,2],[0,3]]
+
+# for n in range(100):
+
+#     p[n]=n/100 # number of previously thought lvl k thinkers who are actually lvl k+1 thinkers
     
-    strat=lvl0
+#     strat=lvl0
     
-    if n==0:
-        r=0
-    elif n>0:
-        r=int(4/(2-np.log10(n))+1) #after k=r the change in strategy will be negligible, so dont bother calculating this high
+#     if n==0:
+#         r=0
+#     elif n>0:
+#         r=int(4/(2-np.log10(n))+1) #after k=r the change in strategy will be negligible, so dont bother calculating this high
     
-    for k in range(r):
-        values=[]
-        for i in range(25):
-            values.append([chests[i]*7500/(hunters[i]+100*strat[i]),i]) #calculates money/hunter of each region
+#     for k in range(500):
+#         values=[]
+#         for i in range(25):
+#             values.append([chests[i]*7500/(hunters[i]+100*strat[i]),i]) #calculates money/hunter of each region
             
-        values.sort()
+#         values.sort()
         
-        oldbest=best
+#         oldbest=best
         
-        best=[values[-1],values[-2],values[-3]]
-        best[1][0]=best[1][0]-25000
-        best[2][0]=best[2][0]-75000
+#         best=[values[-1],values[-2],values[-3]]
+#         best[1][0]=best[1][0]-25000
+#         best[2][0]=best[2][0]-75000
         
-        #print(best) #best three regions and their expected profited
+#         #print(best) #best three regions and their expected profited
         
-        stratchange=25*[0]
-        for i in range(25):
-            for j in range(3):
-                if i==best[j][1] and best[j][0]>0:
-                    stratchange[i]=stratchange[i]+1 #lvl k+1 thinker will go to these best three regions, unless expect to lose money
-                elif i==oldbest[j][1] and oldbest[j][0]>0:
-                    stratchange[i]=stratchange[i]-1 #lvl k thinker did these, so need to change from this
+#         stratchange=25*[0]
+#         for i in range(25):
+#             for j in range(3):
+#                 if i==best[j][1] and best[j][0]>0:
+#                     stratchange[i]=stratchange[i]+1 #lvl k+1 thinker will go to these best three regions, unless expect to lose money
+#                 elif i==oldbest[j][1] and oldbest[j][0]>0:
+#                     stratchange[i]=stratchange[i]-1 #lvl k thinker did these, so need to change from this
         
-        for i in range(25):
-            strat[i] = strat[i] + (p[n]**(k+1))*stratchange[i] #figure out new proportions going to each region
-        #print(stratchange)
-    for m in range(3):
-        if best[m][0]>0:
-            profit[n]=profit[n]+best[m][0]
+#         for i in range(25):
+#             strat[i] = strat[i] + (p[n]**(k+1))*stratchange[i] #figure out new proportions going to each region
+#         #print(stratchange)
+#     for m in range(3):
+#         if best[m][0]>0:
+#             profit[n]=profit[n]+best[m][0]
     
-    expeditions[n] = best
-    print([p[n],expeditions[n]])
+#     expeditions[n] = best
+#     print([p[n],expeditions[n]])
     
-plt.scatter(p,profit)
+# plt.scatter(p,profit)

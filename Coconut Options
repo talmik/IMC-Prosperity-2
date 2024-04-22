@@ -1,0 +1,98 @@
+import numpy as np
+import pandas as pd
+from matplotlib import pyplot as plt
+
+data = pd.read_csv('/Users/thomasfearn/Downloads/round-4-island-data-bottle/prices_round_4_day_1.csv',sep =';')
+
+product = list(data['product'])
+price = list(data['mid_price'])
+
+def avg(x):
+    return sum(x)/len(x)
+
+def var(x):
+    s = 0
+    m=avg(x)
+    for i in range(len(x)):
+        s = s+(x[i]-m)**2
+    s=s/(len(x)-1)
+    return s
+
+def cov(x,y):
+    m_x = avg(x)
+    m_y = avg(y)
+    c_xy = 0
+    for i in range(min(len(x),len(y))):
+        c_xy = c_xy + (x[i]-m_x)*(y[i]-m_y)
+    c_xy = c_xy/(min(len(x),len(y))-1)
+    return c_xy
+
+def corr(x,y):
+    return cov(x,y)/np.sqrt(var(x)*var(y))
+
+def autocorr(x):
+    y=[]
+    z=[]
+    for i in range(len(x)-1):
+        y.append(x[i])
+        z.append(x[i+1])
+    return corr(y,z)
+
+def diff(x):
+    y=[]
+    for i in range(len(x)-1):
+        y.append(x[i+1]-x[i])
+    y.append(0)
+    return y
+
+def linreg(x,y):
+    beta=cov(x,y)/var(x)
+    alpha=avg(y)-beta*avg(x)
+    y_pred=[]
+    sse=0
+    sst=0
+    for i in range(min(len(x),len(y))):
+        y_pred.append(alpha + beta*x[i])
+        sse = sse + (y[i]-y_pred[i])**2
+        sst = sst + (y[i]-avg(y))**2
+    rsq = 1-sse/sst
+    return [alpha,beta,rsq,y_pred]
+
+coc = []
+opt = []
+for i in range(len(product)):
+    if product[i] == 'COCONUT':
+        coc.append(price[i])
+    elif product[i] == 'COCONUT_COUPON':
+        opt.append(price[i])
+
+time = []
+for i in range(len(coc)):
+    time.append(100*i)
+
+cocdiff = diff(coc)
+
+#print(autocorr(cocdiff))
+#-0.04 autocorrelation, very random
+
+optdiff = diff(opt)
+
+#print(autocorr(optdiff))
+#-0.06 autocorrelation
+
+#print(corr(cocdiff,optdiff))
+#0.45, not insignificant
+
+#print(linreg(optdiff,cocdiff)[2])
+#only explains 20% of variance, horrible predictor, may as well treat as independent of optdiff
+
+#print(linreg(opt,cocdiff)[2])
+#even worse, about 0.0001% for first day, less than 0.05% for other days
+
+q = np.random.choice(np.arange(1, 7), p=[0.1, 0.05, 0.05, 0.2, 0.4, 0.2])
+
+ran = int(2*(max(cocdiff)-min(cocdiff))+1)
+val = []
+prob = []
+for i in range(ran):
+    val.append(min(cocdiff)+i/2)

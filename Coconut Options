@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import random
 from matplotlib import pyplot as plt
 
 data = pd.read_csv('/Users/thomasfearn/Downloads/round-4-island-data-bottle/prices_round_4_day_1.csv',sep =';')
@@ -89,10 +90,16 @@ optdiff = diff(opt)
 #print(linreg(opt,cocdiff)[2])
 #even worse, about 0.0001% for first day, less than 0.05% for other days
 
-q = np.random.choice(np.arange(1, 7), p=[0.1, 0.05, 0.05, 0.2, 0.4, 0.2])
-
 ran = int(2*(max(cocdiff)-min(cocdiff))+1)
-val = []
-prob = []
+val = ran*[0]
+prob = ran*[0]
 for i in range(ran):
-    val.append(min(cocdiff)+i/2)
+    val[i] = min(cocdiff)+i/2
+    for j in range(len(cocdiff)):
+        if cocdiff[j] == val[i]:
+            prob[i] = prob[i] + 1
+    prob[i] = prob[i]/len(cocdiff)
+    
+plt.scatter(val,prob)
+    
+#print(random.choices(val,weights = prob))
